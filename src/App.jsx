@@ -1,15 +1,36 @@
-import { useState } from 'react'
-import { formatearDinero } from './helpers';
+import { useEffect, useState } from 'react'
+import { formatearDinero, calcularDescuentos, calcularPorcentaje } from './helpers';
 function App() {
  
   const [salario, setSalario ] = useState(1420000);
+  const [contrato, setContrato] = useState();
+  const [descuentos, setDescuentos] = useState(0);
+  const [total, setTotal] = useState(0);
+  const [porcentaje, setPorcentaje] = useState(0);
+
   const MIN = 1420000;
   const MAX = 12000000;
-  const STEP = 1000;
+  const STEP = 10000;
 
-  function handelChange(e){
+  function handelChangeSalario(e){
     setSalario(Number(e.target.value))
   }
+
+  function handelChangeContrato(e){
+    setContrato(e.target.value)
+  }
+  
+  function handelSubmit(){
+    const descuentos = calcularDescuentos(salario, contrato);
+    setDescuentos(descuentos);
+
+    const total = salario - descuentos;
+    setTotal(total);
+
+    const porcentaje = calcularPorcentaje(contrato);
+    setPorcentaje(porcentaje)
+  }
+
 
   return (
     <div>
@@ -27,7 +48,7 @@ function App() {
               <input 
                 type="range"
                 className="w-full h-6 bg-fuchsia-50 accent-fuchsia-800 hover:accent-fuchsia-700"
-                onChange={handelChange}
+                onChange={handelChangeSalario}
                 min={MIN}
                 max={MAX}
                 step={STEP}
@@ -37,21 +58,29 @@ function App() {
             </div>
             <div>
               <p className='mb-2'>Tipo de contrato</p>
-              <select className='w-full border border-fuchsia-700 focus:outline-none focus:ring focus:ring-fuchsia-700 rounded-lg py-1'>
-                <option disabled>--Selecciona el contrato--</option>
+              <select 
+                className='w-full border border-fuchsia-700 focus:outline-none focus:ring focus:ring-fuchsia-700 rounded-lg py-1'
+                onChange={handelChangeContrato}
+                >
+                <option value="">--Selecciona el contrato--</option>
                 <option value="indefinido" className='text-black'>Termino Indefinido</option>
                 <option value="fijo" className='text-black'>Termino fijo</option>
-                <option value="servicios" className='text-black'>Termino servicios</option>
+                <option value="servicios" className='text-black'>Prestación de servicios</option>
               </select>
             </div>
             <div>
-              <button className='w-full bg-fuchsia-800 font-semibold hover:bg-fuchsia-700  rounded-lg p-1'>Consultar</button>
+              <button className='w-full bg-fuchsia-800 font-semibold hover:bg-fuchsia-700  rounded-lg p-1'
+              onClick={handelSubmit}>Consultar</button>
             </div>
             <div className='bg-gray-400/40 p-5 rounded-lg'>
               <h2 className='text-center text-2xl font-semibold mb-5'>Resumen</h2>
-              <p className='mb-2 font-bold'>Tipo de contrato: </p>
-              <p className='mb-2 font-bold'>Descuentos obligatorios: </p>
-              <p className='mb-2 font-bold'>Neto: </p>
+              <p className='mb-2 font-bold'>Tipo de contrato: <span className='font-normal text-center '> {contrato}</span> </p>
+              <div className='flex gap-7'>
+                <p className='mb-2 font-bold'>Descuentos obligatorios: </p>
+                <p>{parseInt(porcentaje*100)}%</p> 
+                <p>{formatearDinero(descuentos)}</p>
+              </div>                
+              <p className='mb-2 font-bold'>Neto: {formatearDinero(total)} </p>
             </div>
           </div>
         </div>
